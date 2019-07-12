@@ -50,9 +50,9 @@ function anonymizeTextWithin(
     const length = node.textContent.length;
     return document.createTextNode(
       '[text ' +
-        length +
-        (labels.length ? ' | ' + labels.join(', ') : '') +
-        ']',
+      length +
+      (labels.length ? ' | ' + labels.join(', ') : '') +
+      ']',
     );
   }
 
@@ -246,7 +246,7 @@ function addFocusToSelection(
       // the call to 'selection.extend' is about to throw
       DraftJsDebugLogging.logSelectionStateFailure({
         anonymizedDom: getAnonymizedEditorDOM(node),
-        extraParams: JSON.stringify({offset: offset}),
+        extraParams: JSON.stringify({ offset: offset }),
         selectionState: JSON.stringify(selectionState.toJS()),
       });
     }
@@ -257,7 +257,7 @@ function addFocusToSelection(
       selection.extend(node, offset);
     } catch (e) {
       DraftJsDebugLogging.logSelectionStateFailure({
-        anonymizedDom: getAnonymizedEditorDOM(node, function(n) {
+        anonymizedDom: getAnonymizedEditorDOM(node, function (n) {
           const labels = [];
           if (n === activeElement) {
             labels.push('active element');
@@ -302,9 +302,14 @@ function addFocusToSelection(
     // Additionally, clone the selection range. IE11 throws an
     // InvalidStateError when attempting to access selection properties
     // after the range is detached.
-    const range = selection.getRangeAt(0);
-    range.setEnd(node, offset);
-    selection.addRange(range.cloneRange());
+    //
+    // Added rangeCount check
+    // https://stackoverflow.com/questions/22935320/uncaught-indexsizeerror-failed-to-execute-getrangeat-on-selection-0-is-not
+    if (selection.rangeCount > 0) {
+      var range = selection.getRangeAt(0);
+      range.setEnd(node, offset);
+      selection.addRange(range.cloneRange());
+    }
   }
 }
 
@@ -320,7 +325,7 @@ function addPointToSelection(
     // in this case we know that the call to 'range.setStart' is about to throw
     DraftJsDebugLogging.logSelectionStateFailure({
       anonymizedDom: getAnonymizedEditorDOM(node),
-      extraParams: JSON.stringify({offset: offset}),
+      extraParams: JSON.stringify({ offset: offset }),
       selectionState: JSON.stringify(selectionState.toJS()),
     });
     DraftEffects.handleExtensionCausedError();
